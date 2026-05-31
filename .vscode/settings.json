@@ -1,0 +1,23 @@
+{
+    "files.exclude": {
+    "**/.venv": true,
+    "**/.python-version": true,
+    "**/uv.lock": true,
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/*.egg-info": true,
+    "**/.ruff_cache": true,
+    "**/.mypy_cache": true,
+    "**/node_modules": true
+  },
+  "search.exclude": {
+    "**/.venv": true,
+    "**/uv.lock": true,
+    "**/__pycache__": true,
+    "**/logs": true,
+    "**/pids": true
+  },
+  "python.analysis.exclude": [
+    "**/.venv/**"
+  ]
+}
