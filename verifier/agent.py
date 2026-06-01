@@ -51,7 +51,7 @@ print(resultado)
                 reply.body = json.dumps(body)
                 reply.set_metadata("performative", "inform")
                 
-                #await self.send(reply)
+                await self.send(reply)
             logger.info(f"replied to {msg.sender}")
         
     async def setup(self):
