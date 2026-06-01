@@ -1,6 +1,17 @@
-def main():
-    print("Hello from validator!")
+from agent import ValidatorAgent
+import spade
+import logging
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
+    datefmt="%H:%M:%S",
+)
+
+async def main():
+    agent = ValidatorAgent("validator@localhost", "mvp_sma")
+    await agent.start(auto_register=True)
+    await spade.wait_until_finished(agent)
 
 if __name__ == "__main__":
-    main()
+    spade.run(main())
