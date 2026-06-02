@@ -14,7 +14,7 @@ def search_exa(query):
     url = "https://api.exa.ai/search"
     payload = json.dumps({
         "query": query,
-        "numResults": 3,
+        "numResults": 1,
         "contents": {"text": True}
     }).encode()
     req = urllib.request.Request(url, data=payload, headers={
@@ -41,8 +41,9 @@ class ResearchAgent(Agent):
             print(msg.body)
             content = json.loads(msg.body)
             answer = search_exa(content['search'])
-            reply = msg.make_reply()
-            reply.body = json.dumps(answer)
+            print(answer)
+            reply = Message(to="teacher@localhost")
+            reply.body = json.dumps({"question": msg.body, "sources": answer})
             reply.set_metadata("performative", "inform")
             await self.send(reply)
 

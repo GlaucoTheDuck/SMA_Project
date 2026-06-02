@@ -88,7 +88,7 @@ async def ask_question():
             to="researcher@localhost",
             performative="query",
             payload={
-                "question": body.get("question"),
+                "search": body.get("question"),
                 "exercise_statement": body.get("exercise_statement", ""),
             },
         )

@@ -5,6 +5,7 @@ description = "Add your description here"
 requires-python = ">=3.12"
 dependencies = [
     "openai>=2.38.0",
+    "requests>=2.34.2",
     "shared",
     "spade>=4.1.4",
 ]

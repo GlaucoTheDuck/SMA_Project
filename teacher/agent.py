@@ -29,7 +29,7 @@ class TeacherAgent(Agent):
             msg = await self.receive(timeout=10)
             if not msg:
                 return
-
+            print(f'msg: {msg.body}')
             # parse payload inline
             try:
                 payload = json.loads(msg.body) if msg.body else {}
@@ -40,13 +40,22 @@ class TeacherAgent(Agent):
             sources = payload.get("sources", [])
             exercise_statement = payload.get("exercise_statement", "")
             conv_id = msg.get_metadata("conversation_id")
+            print(f'sources: {sources}')
 
             logger.info(f"explaining: {question[:60]}")
 
             sources_block = "\n".join(
-                f"- {s.get('title', 'source')}: {s.get('url')}\n  excerpt: {s.get('excerpt', '')}"
+                f"- {s.get('title', 'source')}: {s.get('link')}\n"
+                f"  excerpt: {s.get('excerpt') or s.get('answer', '')}"
                 for s in sources
             )
+
+            print(f"DEBUG: type(sources) = {type(sources)}")
+            print(f"DEBUG: sources len = {len(sources) if isinstance(sources, list) else 'N/A'}")
+            if isinstance(sources, list) and len(sources) > 0:
+                print(f"DEBUG: first element type = {type(sources[0])}, value = {sources[0]}")
+
+            print(f'source block: {sources_block}')
 
             user_prompt = f"""Reference material:
 {sources_block}

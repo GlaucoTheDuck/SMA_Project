@@ -1,36 +1,84 @@
 <!-- bridge/static/index.html -->
 <!DOCTYPE html>
 <html>
-<head><title>Tutor</title></head>
+<head>
+  <meta charset="utf-8">
+  <title>Tutor</title>
+</head>
 <body>
+
+  <h1>Tutor de Programação</h1>
+
+  <h2>1. Pedir exercício</h2>
+  Tópico: <input id="topic" value="loops">
   <button onclick="getExercise()">Pedir exercício</button>
-  <pre id="output"></pre>
-  <textarea id="code" rows="10" cols="60"></textarea>
+  <pre id="exercise-output">(nenhum exercício ainda)</pre>
+
+  <h2>2. Escrever e submeter</h2>
+  <textarea id="code" rows="10" cols="80" placeholder="cole seu código aqui"></textarea>
+  <br>
   <button onclick="submitCode()">Submeter</button>
+  <pre id="result-output">(sem submissão ainda)</pre>
 
-  <script>
-    let currentExercise = null;
+  <h2>3. Pedir ajuda</h2>
+  <input id="question" placeholder="qual a sua dúvida?" size="60">
+  <button onclick="askQuestion()">Perguntar</button>
+  <pre id="help-output">(sem pergunta ainda)</pre>
 
-    async function getExercise() {
-      const resp = await fetch("/request-exercise", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({topic: "loops"}),
-      });
-      const data = await resp.json();
-      currentExercise = data.result.payload.exercise;
-      document.getElementById("output").textContent = JSON.stringify(data, null, 2);
-    }
+<script>
+let currentExercise = null;
 
-    async function submitCode() {
-      const code = document.getElementById("code").value;
-      const resp = await fetch("/submit-code", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({exercise: currentExercise, code}),
-      });
-      document.getElementById("output").textContent = JSON.stringify(await resp.json(), null, 2);
-    }
-  </script>
+async function getExercise() {
+  const topic = document.getElementById("topic").value;
+  const resp = await fetch("/request-exercise", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({topic}),
+  });
+  const data = await resp.json();
+  console.log("getExercise:", data);
+
+  if (data.ok && data.result?.type === "exercise") {
+    currentExercise = data.result.exercise;
+  }
+  document.getElementById("exercise-output").textContent = JSON.stringify(data, null, 2);
+}
+
+async function submitCode() {
+  if (!currentExercise) {
+    alert("Peça um exercício primeiro");
+    return;
+  }
+  const code = document.getElementById("code").value;
+  const resp = await fetch("/submit-code", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({exercise: currentExercise, code}),
+  });
+  const data = await resp.json();
+  console.log("submitCode:", data);
+  document.getElementById("result-output").textContent = JSON.stringify(data, null, 2);
+}
+
+async function askQuestion() {
+  const question = document.getElementById("question").value;
+  if (!question) {
+    alert("Digite uma pergunta");
+    return;
+  }
+  const resp = await fetch("/ask-question", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      question,
+      exercise_statement: currentExercise?.statement || ""
+    }),
+  });
+  const data = await resp.json();
+  console.log("askQuestion:", data);
+  document.getElementById("help-output").textContent = JSON.stringify(data, null, 2);
+}
+</script>
+
 </body>
 </html>

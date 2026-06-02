@@ -9,7 +9,7 @@ logging.basicConfig(
 )
 
 async def main():
-    agent = ResearchAgent("research@localhost", "mvp_sma")
+    agent = ResearchAgent("researcher@localhost", "mvp_sma")
     await agent.start(auto_register=True)
     await spade.wait_until_finished(agent)
 

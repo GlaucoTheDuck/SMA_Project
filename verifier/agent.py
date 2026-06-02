@@ -29,7 +29,7 @@ class VerifierAgent(Agent):
 {code}
 
 # --- ÁREA DE TESTE INJETADA AUTOMATICAMENTE ---
-resultado = {function_name}({repr(tests[0]['args'][0])})
+resultado = {exercise['function_name']}({repr(exercise['tests'][0]['args'][0])})
 print(resultado)
 """).strip()
             print(script)
@@ -43,14 +43,25 @@ print(resultado)
             print(result)
             if result.returncode == 0:
                 print("Exit:", result.stdout) # Lógica de Conclusão
+                reply = msg.make_reply()
+                reply.body = json.dumps({"exercise": exercise, "result": result.stdout})
+                reply.set_metadata("performative", "inform")
+                reply.set_metadata("success", 'True')
+                reply.set_metadata("conversation_id", msg.get_metadata("conversation_id"))
+                await self.send(reply)
             else:
                 body = {
                     'search': f"Code: {result.returncode} Error: {result.stderr}"
                 }
-                reply = Message(to="research@localhost")
+                reply = Message(to="researcher@localhost")
                 reply.body = json.dumps(body)
                 reply.set_metadata("performative", "inform")
-                
+                reply.set_metadata("conversation_id", msg.get_metadata("conversation_id"))
+                await self.send(reply)
+
+                reply.to = "teacher@localhost"
+                reply.set_metadata("success", 'False')
+                reply.set_metadata("conversation_id", msg.get_metadata("conversation_id"))
                 await self.send(reply)
             logger.info(f"replied to {msg.sender}")
         
