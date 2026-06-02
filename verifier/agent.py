@@ -22,9 +22,9 @@ class VerifierAgent(Agent):
             generate = json.loads(msg.body)
 
             code = generate['code']
-            function_name = generate['function_name']
-            tests = generate['tests']
-
+            #function_name = generate['function_name']
+            exercise = generate['exercise']
+            print(exercise)
             script = textwrap.dedent(f"""
 {code}
 
@@ -55,6 +55,6 @@ print(resultado)
             logger.info(f"replied to {msg.sender}")
         
     async def setup(self):
-        logger.info("[validator] online")
+        logger.info("[verifier] online")
         self.add_behaviour(self.HandleRequest())
 

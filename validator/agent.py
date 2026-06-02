@@ -42,7 +42,13 @@ print(resultado)
 
             print(result)
             if result.returncode == 0:
-                print("Exit:", result.stdout)
+                body = {"type": "exercise", "exercise": generate}
+                reply = Message(to="bridge@localhost")
+                reply.body = json.dumps(body)
+                reply.set_metadata("performative", "inform")
+                reply.set_metadata("ontology", "tutor-mvp")
+                reply.set_metadata("conversation_id", msg.get_metadata("conversation_id"))
+                await self.send(reply)
             else:
                 body = {
                     'msg': f"An error occurred while trying to run the validation code. Refactor the code by pointing out the problem.",
@@ -52,9 +58,10 @@ print(resultado)
                 reply = msg.make_reply()
                 reply.body = json.dumps(body)
                 reply.set_metadata("performative", "inform")
+                reply.set_metadata("conversation_id", msg.get_metadata("conversation_id"))
                 
                 await self.send(reply)
-            logger.info(f"replied to {msg.sender}")
+            logger.info(f"replied to {reply.to}")
         
     async def setup(self):
         logger.info("[validator] online")

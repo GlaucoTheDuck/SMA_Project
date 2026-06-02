@@ -10,7 +10,7 @@ logging.basicConfig(
 
 async def main():
     agent = GeneratorAgent("generator@localhost", "mvp_sma")
-    await agent.start(auto_register=True)
+    await agent.start()
     await spade.wait_until_finished(agent)
 
 if __name__ == "__main__":

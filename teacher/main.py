@@ -1,6 +1,17 @@
-def main():
-    print("Hello from teacher!")
+from agent import TeacherAgent
+import spade
+import logging
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
+    datefmt="%H:%M:%S",
+)
+
+async def main():
+    agent = TeacherAgent("teacher@localhost", "mvp_sma")
+    await agent.start(auto_register=True)
+    await spade.wait_until_finished(agent)
 
 if __name__ == "__main__":
-    main()
+    spade.run(main())

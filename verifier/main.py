@@ -9,7 +9,7 @@ logging.basicConfig(
 )
 
 async def main():
-    agent = VerifierAgent("generator@localhost", "mvp_sma")
+    agent = VerifierAgent("verifier@localhost", "mvp_sma")
     await agent.start(auto_register=True)
     await spade.wait_until_finished(agent)
 

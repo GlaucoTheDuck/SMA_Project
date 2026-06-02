@@ -1,16 +1,36 @@
-
 from spade.agent import Agent
 from spade.behaviour import CyclicBehaviour
 from spade.message import Message
-import subprocess
 import json
-import textwrap
-from howdoi import howdoi
+import urllib.request
+import urllib.parse
 import logging
-
 
 logger = logging.getLogger(__name__)
 
+EXA_API_KEY = "4935752b-bc4e-4a40-a57f-6a472efaeb44"
+
+def search_exa(query):
+    url = "https://api.exa.ai/search"
+    payload = json.dumps({
+        "query": query,
+        "numResults": 3,
+        "contents": {"text": True}
+    }).encode()
+    req = urllib.request.Request(url, data=payload, headers={
+        "Content-Type": "application/json",
+        "x-api-key": EXA_API_KEY
+    })
+    with urllib.request.urlopen(req) as r:
+        results = json.loads(r.read())["results"]
+    return [
+        {
+            "title": item.get("title", ""),
+            "link": item.get("url", ""),
+            "answer": (item.get("text") or "")
+        }
+        for item in results
+    ]
 
 class ResearchAgent(Agent):
     class HandleRequest(CyclicBehaviour):
@@ -18,24 +38,14 @@ class ResearchAgent(Agent):
             msg = await self.receive(timeout=10)
             if not msg:
                 return
-            
             print(msg.body)
             content = json.loads(msg.body)
-
-            query = {
-                'query': content['search'],
-                'num_answers': 3,
-                'link': True
-            }
-            answer = howdoi.howdoi(query)
-            
+            answer = search_exa(content['search'])
             reply = msg.make_reply()
             reply.body = json.dumps(answer)
             reply.set_metadata("performative", "inform")
-
             await self.send(reply)
-        
+
     async def setup(self):
         logger.info("[researcher] online")
         self.add_behaviour(self.HandleRequest())
-

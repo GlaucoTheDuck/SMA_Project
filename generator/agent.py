@@ -34,7 +34,8 @@ class GeneratorAgent(Agent):
             reply = Message(to=VALIDATOR_JID)
             reply.body = example.model_dump_json()
             reply.set_metadata("performative", "inform")
-            print(reply.to)
+            reply.set_metadata("conversation_id", msg.get_metadata("conversation_id"))
+            print(reply)
             await self.send(reply)
             logger.info(f"replied to {msg.sender}")
         

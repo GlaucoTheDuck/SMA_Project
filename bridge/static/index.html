@@ -1,0 +1,36 @@
+<!-- bridge/static/index.html -->
+<!DOCTYPE html>
+<html>
+<head><title>Tutor</title></head>
+<body>
+  <button onclick="getExercise()">Pedir exercício</button>
+  <pre id="output"></pre>
+  <textarea id="code" rows="10" cols="60"></textarea>
+  <button onclick="submitCode()">Submeter</button>
+
+  <script>
+    let currentExercise = null;
+
+    async function getExercise() {
+      const resp = await fetch("/request-exercise", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({topic: "loops"}),
+      });
+      const data = await resp.json();
+      currentExercise = data.result.payload.exercise;
+      document.getElementById("output").textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function submitCode() {
+      const code = document.getElementById("code").value;
+      const resp = await fetch("/submit-code", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({exercise: currentExercise, code}),
+      });
+      document.getElementById("output").textContent = JSON.stringify(await resp.json(), null, 2);
+    }
+  </script>
+</body>
+</html>
