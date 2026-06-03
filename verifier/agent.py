@@ -20,11 +20,12 @@ class VerifierAgent(Agent):
                 return
             print(msg.body)
             generate = json.loads(msg.body)
-
+            conv_id = msg.get_metadata('conversation_id')
             code = generate['code']
-            #function_name = generate['function_name']
             exercise = generate['exercise']
-            print(exercise)
+            
+            print(conv_id)
+            
             script = textwrap.dedent(f"""
 {code}
 
@@ -47,7 +48,7 @@ print(resultado)
                 reply.body = json.dumps({"exercise": exercise, "result": result.stdout})
                 reply.set_metadata("performative", "inform")
                 reply.set_metadata("success", 'True')
-                reply.set_metadata("conversation_id", msg.get_metadata("conversation_id"))
+                reply.set_metadata("conversation_id", conv_id)
                 await self.send(reply)
             else:
                 body = {
@@ -56,12 +57,7 @@ print(resultado)
                 reply = Message(to="researcher@localhost")
                 reply.body = json.dumps(body)
                 reply.set_metadata("performative", "inform")
-                reply.set_metadata("conversation_id", msg.get_metadata("conversation_id"))
-                await self.send(reply)
-
-                reply.to = "teacher@localhost"
-                reply.set_metadata("success", 'False')
-                reply.set_metadata("conversation_id", msg.get_metadata("conversation_id"))
+                reply.set_metadata("conversation_id", conv_id)
                 await self.send(reply)
             logger.info(f"replied to {msg.sender}")
         

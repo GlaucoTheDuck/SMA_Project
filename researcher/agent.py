@@ -3,7 +3,6 @@ from spade.behaviour import CyclicBehaviour
 from spade.message import Message
 import json
 import urllib.request
-import urllib.parse
 import logging
 
 logger = logging.getLogger(__name__)
@@ -38,13 +37,21 @@ class ResearchAgent(Agent):
             msg = await self.receive(timeout=10)
             if not msg:
                 return
-            print(msg.body)
+            conv_id = msg.get_metadata("conversation_id")
+            
+            
             content = json.loads(msg.body)
             answer = search_exa(content['search'])
-            print(answer)
+
+            body = {"question": msg.body, "sources": answer}
+            if content.get('failure', ''): body['failure'] = content.get('failure')
+            
             reply = Message(to="teacher@localhost")
-            reply.body = json.dumps({"question": msg.body, "sources": answer})
+            reply.body = json.dumps(body)
             reply.set_metadata("performative", "inform")
+            reply.set_metadata("conversation_id", conv_id)
+
+            print('>> [researcher] replyied')
             await self.send(reply)
 
     async def setup(self):

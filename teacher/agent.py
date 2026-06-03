@@ -15,10 +15,12 @@ BRIDGE_JID = "bridge@localhost"  # constante local mesmo
 SYSTEM_PROMPT = """You are a Python programming tutor helping a beginner student.
 
 Rules you MUST follow:
-- Answer ONLY the specific question asked. Don't dump everything you know about the topic.
+- Answer ONLY the specific question asked or explain ONLY the exact error reported.
+- NEVER offer opinions on how the student should change, structure, or improve their code unless explicitly asked.
+- NEVER point out other errors, bugs, or bad practices in the code beyond what the student specifically inquired about. Don't dump everything you know about the topic.
 - Base your explanation on the reference material provided. Don't invent facts.
 - Always include the source links at the end of your answer for further reading.
-- Do NOT write the full solution to the exercise. Explain the concept, not the answer.
+- Do NOT write the full solution to the exercise. Explain the concept or the specific error, not the answer.
 - Keep it short: 4 to 6 sentences max.
 - Reply in Portuguese."""
 
@@ -29,7 +31,6 @@ class TeacherAgent(Agent):
             msg = await self.receive(timeout=10)
             if not msg:
                 return
-            print(f'msg: {msg.body}')
             # parse payload inline
             try:
                 payload = json.loads(msg.body) if msg.body else {}
@@ -38,42 +39,34 @@ class TeacherAgent(Agent):
 
             question = payload.get("question", "")
             sources = payload.get("sources", [])
-            exercise_statement = payload.get("exercise_statement", "")
+            failure = payload.get("failure", '')
+            exercise = payload.get("exercise", "")
             conv_id = msg.get_metadata("conversation_id")
-            print(f'sources: {sources}')
 
             logger.info(f"explaining: {question[:60]}")
-
             sources_block = "\n".join(
-                f"- {s.get('title', 'source')}: {s.get('link')}\n"
-                f"  excerpt: {s.get('excerpt') or s.get('answer', '')}"
+                f"- {s.get('title'): {s.get('link')}}\n"
+                f"- source: {s.get('source')}" if s.get('source') else ''
                 for s in sources
             )
-
-            print(f"DEBUG: type(sources) = {type(sources)}")
-            print(f"DEBUG: sources len = {len(sources) if isinstance(sources, list) else 'N/A'}")
-            if isinstance(sources, list) and len(sources) > 0:
-                print(f"DEBUG: first element type = {type(sources[0])}, value = {sources[0]}")
-
-            print(f'source block: {sources_block}')
-
+            
             user_prompt = f"""Reference material:
 {sources_block}
 
 Exercise the student is working on:
-{exercise_statement}
+{exercise}
 
-Student's question:
-{question}
+{f'Student\'s question or error: {question}' if question else f''}
 
 Answer focused on the question. End with the links from the reference material."""
-
+            print(user_prompt)
             try:
-                answer = chat(user_prompt, system=SYSTEM_PROMPT, temperature=0.4)
+                answer = 'bah'#chat(user_prompt, system=SYSTEM_PROMPT, temperature=0.4)
             except Exception as e:
                 logger.error(f"LLM failed: {e}")
                 links = ", ".join(s.get("url", "") for s in sources)
                 answer = f"Não consegui formular a resposta agora. Consulte os links: {links}"
+                raise e
 
             # build reply inline
             reply = Message(to=BRIDGE_JID)
